@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+# Copyright (c) 2015 Presslabs SRL
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from __future__ import absolute_import
+
+import glob
+import os
+import sys
+
+
+os.environ['PYFLAKES_NODOCTEST'] = '1'
+
+# pep8.py uses sys.argv to find setup.cfg
+sys.argv = [os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)]
+
+# git usurbs your bin path for hooks and will always run system python
+if 'VIRTUAL_ENV' in os.environ:
+    site_packages = glob.glob(
+        '%s/lib/*/site-packages' % os.environ['VIRTUAL_ENV'])[0]
+    sys.path.insert(0, site_packages)
+
+
+def main():
+    from flake8.main import DEFAULT_CONFIG
+    from flake8.engine import get_style_guide
+    from flake8.hooks import run
+
+    gitcmd = "git diff-index --cached --name-only HEAD"
+
+    _, files_modified, _ = run(gitcmd)
+
+    # remove non-py files and files which no longer exist
+    files_modified = [x for x in files_modified if x.endswith('.py') and os.path.exists(x)]
+
+    flake8_style = get_style_guide(parse_argv=True, config_file=DEFAULT_CONFIG)
+    report = flake8_style.check_files(files_modified)
+
+    return report.total_errors
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,0 +1,81 @@
+baseURL = "https://www.presslabs.com/docs/code/silver/"
+pygmentsCodeFences = true
+pygmentsCodeFencesGuessSyntax = true
+pygmentsUseClasses = true
+theme = "hugo-docs-theme"
+languageCode = "en-us"
+title = "Silver"
+
+[markup]
+  defaultMarkdownHandler = "goldmark"
+
+[params]
+  related = true
+  logo_text = "DOCS"
+  versions = false
+
+[params.algolia]
+  appId = "0TS6NFHDBC"
+  apiKey = "b2efcfd6516eed7a2f19269f9cb13acb"
+  indexName = "Silver Docs"
+  vars = ["title", "description", "content", "date", "lastmod", "permalink", "text", "lvl0", "lvl1", "url"]
+
+[outputs]
+  home = [ "HTML", "RSS", "JSON" ]
+
+[related]
+  threshold = 80
+  includeNewer = true
+  toLower = false
+
+[[related.indices]]
+  name = "menu.global.parent"
+  weight = 150
+
+[[menu.global]]
+  name = "Install and configure Silver"
+  weight = 2
+  identifier = "install-and-configure-silver"
+  url = "/install-and-configure-silver/"
+
+[[menu.global]]
+  name = "Silver Resources"
+  weight = 3
+  url = "/silver-resources/"
+
+[[menu.global]]
+  name = "Billing Documents"
+  weight = 4
+  identifier = "billing-documents"
+  url = "/billing-documents/"
+
+[[menu.global]]
+  name = "Billing Entities"
+  weight = 5
+  identifier = "billing-entities"
+  url = "/billing-entities/"
+
+[[menu.global]]
+  name = "Billing Units"
+  weight = 6
+  identifier = "billing-units"
+  url = "/billing-units/"
+
+[[menu.global]]
+  name = "Payments"
+  weight = 7
+  identifier = "payments"
+  url = "/payments/"
+
+[[menu.global]]
+  name = "Guides"
+  weight = 8
+  identifier = "guides"
+  url = "/guides/"
+
+[[menu.global]]
+  name = "How to add a new payment processor"
+  weight = 8
+  parent = "guides"
+  identifier = "adding-a-new-payment-processor"
+  url = "/adding-a-new-payment-processor/"
