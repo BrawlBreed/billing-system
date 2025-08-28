@@ -45,7 +45,7 @@ def get_storage():
 
 def get_upload_path(instance, filename):
     return instance.upload_path
-
+ 
 
 class PDF(Model):
     uuid = UUIDField(default=uuid.uuid4, unique=True)

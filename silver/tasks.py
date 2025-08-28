@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Presslabs SRL
+# Copyright (c) 2025 Orbbin 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from __future__ import absolute_import
 
 from itertools import chain
 
-from celery import group, shared_task
+from celery import group, shared_task  # This is correct
 from celery_once import QueueOnce
 from redis.exceptions import LockError
 

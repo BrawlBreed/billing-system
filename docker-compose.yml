@@ -1,18 +1,103 @@
-version: '2'
-services:
-  silver:
-    image: presslabs/silver:latest
-    command: dockerize -wait tcp://db:3306 -timeout 30s /silver/docker-entrypoint
-    env_file: ./docker-compose.env
-    ports:
-      - "8080:8080"
-    volumes:
-      - .:/silver
+# version: '2'
+# services:
+#   silver:
+#     image: presslabs/silver:latest
+#     command: dockerize -wait tcp://db:3306 -timeout 30s /silver/docker-entrypoint
+#     env_file: ./docker-compose.env
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - .:/silver
 
-  db:
-    image: mysql:5.7
+#   db:
+#     image: mysql:5.7
+#     environment:
+#       MYSQL_ROOT_PASSWORD: password
+#       MYSQL_DATABASE: silver
+#       MYSQL_USER: silver
+#       MYSQL_PASSWORD: password
+services:
+  postgres:
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: silver
-      MYSQL_USER: silver
-      MYSQL_PASSWORD: password
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: appsecret
+    ports:
+      - "5432:5432"      # <-- publish to host
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"      # <-- publish to host
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  celery_worker:
+    image: python:3.9
+    working_dir: /app
+    command: >
+      bash -lc "pip install --no-cache-dir -r requirements.txt &&
+                pip install --no-cache-dir 'celery[redis]' &&
+                celery -A silver.celery_app:app worker --loglevel=info"
+    volumes:
+      - .:/app
+      - ./app_media:/app/app_media
+    environment:
+      - PYTHONPATH=/app/billing_system
+      - DJANGO_SETTINGS_MODULE=silver.settings
+      - CELERY_APP=silver.celery_app:app
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - ONCE_BACKEND=celery_once.backends.Redis
+      - ONCE_BACKEND_SETTINGS={"url":"redis://redis:6379/0"}
+      - TIME_ZONE=UTC
+      - PIP_ROOT_USER_ACTION=ignore
+      - PIP_DISABLE_PIP_VERSION_CHECK=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  celery_beat:
+    image: python:3.9
+    working_dir: /app
+    command: >
+      bash -lc "pip install --no-cache-dir -r requirements.txt &&
+                pip install --no-cache-dir 'celery[redis]' &&
+                celery -A silver.celery_app:app beat --loglevel=info --schedule /app/celerybeat-schedule"
+    volumes:
+      - .:/app
+      - ./app_media:/app/app_media
+    environment:
+      - PYTHONPATH=/app/billing_system
+      - DJANGO_SETTINGS_MODULE=silver.settings
+      - CELERY_APP=silver.celery_app:app
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - ONCE_BACKEND=celery_once.backends.Redis
+      - ONCE_BACKEND_SETTINGS={"url":"redis://redis:6379/0"}
+      - TIME_ZONE=UTC
+      - PIP_ROOT_USER_ACTION=ignore
+      - PIP_DISABLE_PIP_VERSION_CHECK=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redis_data:
+  media_files:

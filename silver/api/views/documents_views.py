@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Pressinfra SRL
+# Copyright (c) 2024 Orbbin
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -391,4 +391,5 @@ class PDFRetrieve(generics.RetrieveAPIView):
 
     def get(self, *args, **kwargs):
         pdf = self.get_object()
+        print(pdf)
         return HttpResponseRedirect(pdf.url)

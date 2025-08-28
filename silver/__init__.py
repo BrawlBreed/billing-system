@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Presslabs SRL
+# Copyright (c) 2025 Orbbin 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,3 +39,7 @@ HOOK_EVENTS = {
     'proforma.updated': 'silver.Proforma.updated',
     'proforma.deleted': 'silver.Proforma.deleted',
 }
+
+from .celery_app import app as celery_app
+
+__all__ = ('celery_app',)
